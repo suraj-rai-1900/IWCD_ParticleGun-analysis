@@ -28,6 +28,7 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
     model.train()
 
     test_acc, test_f1, test_precision, test_recall = model.test()
+    print(f' The best threshold is : {model.best_thresh}')
     train_acc, train_f1, train_precision, train_recall = model.test_on_train()
 
     plt.hist(model.y_train, label='train_sig', histtype='step')

@@ -182,7 +182,7 @@ class CutEngine:
         plt.hist([self.test_prob[self.y_test == i] for i in range(2)], histtype="step", bins=50, range=(0, 1),
                  label=["Background", "Signal"])
         if label == 'train':
-            plt.hist([self.train_prob[self.y_test == i] for i in range(2)], histtype="step", bins=50, range=(0, 1),
+            plt.hist([self.train_prob[self.y_train == i] for i in range(2)], histtype="step", bins=50, range=(0, 1),
                      label=["Background", "Signal"])
         plt.title(f'Probability Distribution for {label} events')
         plt.xlabel("Computed probability")

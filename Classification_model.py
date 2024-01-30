@@ -180,10 +180,11 @@ class CutEngine:
         return train_accuracy, train_f1, prec, rec
 
     def plot_probs(self, label='test', y_log=False):
-        plt.hist([self.test_prob[self.y_test == i] for i in range(2)], histtype="step", bins=50, range=(0, 1),
-                 label=["Background", "Signal"])
         if label == 'train':
             plt.hist([self.train_prob[self.y_train == i] for i in range(2)], histtype="step", bins=50, range=(0, 1),
+                     label=["Background", "Signal"])
+        else:
+            plt.hist([self.test_prob[self.y_test == i] for i in range(2)], histtype="step", bins=50, range=(0, 1),
                      label=["Background", "Signal"])
         plt.title(f'Probability Distribution for {label} events')
         plt.xlabel("Computed probability")

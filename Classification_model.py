@@ -95,7 +95,7 @@ class CutEngine:
         elif model_name == 'xgboost':
             self.param_grid = self.param_grid_xgboost
             print(f"Using {model_name} model")
-            self.rf_model = XGBClassifier(n_estimators=280, subsample=0.1, tol=2.51*10**-7, learning_rate=0.01,
+            self.rf_model = XGBClassifier(n_estimators=280, subsample=0.1, learning_rate=0.01, 
                                           max_depth=5)
 
         if train_labels is None:

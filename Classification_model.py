@@ -37,6 +37,7 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
     plt.title('Signal/background counts used for testing and training')
     plt.legend()
     plt.show()
+    plt.clf()
 
     model.plot_probs(label='train', y_log=True)
     print(f'The train accuracy is:{train_acc}')

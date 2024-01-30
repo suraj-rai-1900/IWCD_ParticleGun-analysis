@@ -125,7 +125,7 @@ class CutEngine:
         df_cut = self.df[self.df['h5_labels'].isin(self.training_labels)]
         df_chosen = df_cut[self.training_col]
 
-        plot_class_frac(df_chosen)
+        plot_class_frac(df_cut)
         plot_sig_frac(df_chosen)
 
         self.X = df_chosen.drop(columns=['true_sig'])

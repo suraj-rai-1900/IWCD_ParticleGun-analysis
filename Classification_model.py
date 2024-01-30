@@ -8,6 +8,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.calibration import calibration_curve
 import numpy as np
 import matplotlib.pyplot as plt
+from utils import plot_class_frac, plot_sig_frac
 
 
 def weighted_f1(y_true, y_pred, w=1):
@@ -28,6 +29,14 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
 
     test_acc, test_f1, test_precision, test_recall = model.test()
     train_acc, train_f1, train_precision, train_recall = model.test_on_train()
+
+    plt.hist(model.y_train, label='train_sig')
+    plt.hist(model.y_test, label='test_sig')
+    plt.xlabel('Signal/background label')
+    plt.ylabel('Count')
+    plt.title('Signal/background counts used for testing and training')
+    plt.legend()
+    plt.show()
 
     model.plot_probs(label='train', y_log=True)
     print(f'The train accuracy is:{train_acc}')
@@ -115,6 +124,9 @@ class CutEngine:
     def prepare_data(self):
         df_cut = self.df[self.df['h5_labels'].isin(self.training_labels)]
         df_chosen = df_cut[self.training_col]
+
+        plot_class_frac(df_chosen)
+        plot_sig_frac(df_chosen)
 
         self.X = df_chosen.drop(columns=['true_sig'])
         self.y = df_chosen['true_sig']

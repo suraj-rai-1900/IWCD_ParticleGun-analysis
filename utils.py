@@ -314,7 +314,7 @@ def plot_class_frac(df):
 def plot_sig_frac(df):
     label_list = [0, 1]
     legends = ['Background', 'Signal']
-    counts = [len(df[df['sig'] == label]) / len(df) for label in label_list]
+    counts = [len(df[df['true_sig'] == label]) / len(df) for label in label_list]
     plt.bar(legends, counts)
     plt.xlabel("Class")
     plt.ylabel("Class Fraction [a.u.]")

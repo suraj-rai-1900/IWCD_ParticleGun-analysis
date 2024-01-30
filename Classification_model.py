@@ -132,7 +132,7 @@ class CutEngine:
         self.X = df_chosen.drop(columns=['true_sig'])
         self.y = df_chosen['true_sig']
 
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.8,
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, train_size=0.8,
                                                                                 random_state=42)
 
         scaler = StandardScaler()

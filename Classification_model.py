@@ -54,11 +54,9 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
 
     feature_imp = model.get_features_importances()
     print(feature_imp)
-
-    if df['h5_labels'].isin(train_labels).all():
-        df[model_name + '_sig'] = (model.y_prob >= model.best_thresh).astype(int)
-    else:
-        df[model_name + '_sig'] = 0
+    
+    df[model_name + '_sig'] = 0
+    df.loc[df['h5_labels'].isin(train_labels), model_name + '_sig'] = (model.y_prob >= model.best_thresh).astype(int)
 
 
 class CutEngine:

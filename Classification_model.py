@@ -103,7 +103,7 @@ class CutEngine:
         self.best_thresh = 0
         self.training_col = train_col
         self.df = df
-        self.features = [key for key in train_col if key != 'sig']
+        self.features = [key for key in train_col if key != 'true_sig']
 
         self.X = None
         self.X_scaled = None

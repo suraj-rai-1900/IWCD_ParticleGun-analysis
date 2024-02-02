@@ -68,8 +68,8 @@ class CutEngine:
             self.param_grid_gbdt = {
                 'n_estimators': [i for i in np.arange(100, 300, 20)],
                 'subsample': [i for i in np.arange(0.1, 0.9, 0.08)],
-                'tol': [10 ** -i for i in np.arange(1, 9, 0.8)],
-                'learning_rate': [0.01, 0.05, 0.1, 0.5, 1.0]
+                # 'tol': [10 ** -i for i in np.arange(1, 9, 0.8)],
+                # 'learning_rate': [0.01, 0.05, 0.1, 0.5, 1.0]
             }
 
             self.param_grid_adaboost = {

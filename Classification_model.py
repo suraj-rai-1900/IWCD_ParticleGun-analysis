@@ -12,8 +12,8 @@ from utils import plot_class_frac, plot_sig_frac
 
 
 def weighted_f1(y_true, y_pred, w):
-    precision = precision_score(y_true, y_pred, zero_division=np.nan)
-    rec = recall_score(y_true, y_pred, zero_division=np.nan)
+    precision = precision_score(y_true, y_pred, zero_division=0)
+    rec = recall_score(y_true, y_pred, zero_division=0)
     mod_f1 = (1 + w) * (precision * rec) / (w * precision + rec) if (w * precision + rec) != 0 else 0
     return mod_f1, precision, rec
 

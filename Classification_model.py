@@ -157,7 +157,7 @@ class CutEngine:
 
     def grid_search(self):
         grid_search = GridSearchCV(self.rf_model, self.param_grid, cv=5, error_score=0, refit=True, scoring='accuracy',
-                                   verbose=2, n_jobs=-1)
+                                   verbose=0, n_jobs=-1)
         grid_search.fit(self.X_train_scaled, self.y_train)
         self.rf_model = grid_search.best_estimator_
         print(f"Best Parameters: {grid_search.best_params_}")

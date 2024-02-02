@@ -12,11 +12,10 @@ from utils import plot_class_frac, plot_sig_frac
 
 
 def weighted_f1(y_true, y_pred, w):
-    precision = precision_score(y_true, y_pred)
-    rec = recall_score(y_true, y_pred)
-    mod_f1 = (1 + w) * (precision * rec) / (w * precision + rec)
+    precision = precision_score(y_true, y_pred, zero_division=np.nan)
+    rec = recall_score(y_true, y_pred, zero_division=np.nan)
+    mod_f1 = (1 + w) * (precision * rec) / (w * precision + rec) if (w * precision + rec) != 0 else 0
     return mod_f1, precision, rec
-
 
 def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False):
     model = CutEngine(df, train_col, train_labels, model_name, grid_search)
@@ -170,29 +169,22 @@ class CutEngine:
         self.train_prob = self.rf_model.predict_proba(self.X_train_scaled)[:, 1]
         self.y_prob = self.rf_model.predict_proba(self.X_scaled)[:, 1]
 
-    def test(self):
-        best_threshold = 0
-        best_f1 = 0
-
-        precision_array = np.array([])
-        recall_array = np.array([])
-        f1_array = np.array([])
-        threshold_array = np.array([])
-
+        def test(self):
         weights = np.arange(0, 1, 0.01)
-        for weight in weights:
-            for threshold in np.linspace(0, 0.9, 100):
-                test_predictions = (self.test_prob >= threshold).astype(int)
-                test_f1, prec, rec = weighted_f1(self.y_test, test_predictions, w=weight)
-                if test_f1 > best_f1:
-                    best_f1 = test_f1
-                    best_threshold = threshold
+        precision_array = np.zeros_like(weights)
+        recall_array = np.zeros_like(weights)
+        f1_array = np.zeros_like(weights)
+        threshold_array = np.zeros_like(weights)
+
+        for i, weight in enumerate(weights):
+            threshold = np.linspace(0, 0.9, 100)
+            predictions = (self.test_prob[:, np.newaxis] >= threshold).astype(int)
+            test_f1_array = np.array([weighted_f1(self.y_test, preds, w=weight)[0] for preds in predictions.T])
+            best_threshold_index = np.argmax(test_f1_array)
+            best_threshold = threshold[best_threshold_index]
             predictions = (self.test_prob >= best_threshold).astype(int)
-            test_f1, prec, rec = weighted_f1(self.y_test, predictions, w=weight)
-            np.append(precision_array, prec)
-            np.append(recall_array, rec)
-            np.append(f1_array, test_f1)
-            np.append(threshold_array, best_threshold)
+            f1_array[i], precision_array[i], recall_array[i] = weighted_f1(self.y_test, predictions, w=weight)
+            threshold_array[i] = best_threshold
 
         plt.errorbar(weights, precision_array, label=self.model_name + 'precision')
         plt.errorbar(weights, recall_array, label=self.model_name + 'recall')
@@ -211,9 +203,8 @@ class CutEngine:
         test_accuracy = accuracy_score(self.y_test, self.test_predictions)
         self.weight = weights[index]
         return test_accuracy, precision_array[index], recall_array[index], f1_array[index]
-
+        
     def test_on_train(self):
-        # Evaluate on the train set
         self.train_predictions = (self.train_prob >= self.best_thresh).astype(int)
         train_accuracy = accuracy_score(self.y_train, self.train_predictions)
         train_f1, prec, rec = weighted_f1(self.y_train, self.train_predictions, w=self.weight)

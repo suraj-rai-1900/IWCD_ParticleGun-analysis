@@ -169,7 +169,7 @@ class CutEngine:
         self.train_prob = self.rf_model.predict_proba(self.X_train_scaled)[:, 1]
         self.y_prob = self.rf_model.predict_proba(self.X_scaled)[:, 1]
 
-        def test(self):
+    def test(self):
         weights = np.arange(0, 1, 0.01)
         precision_array = np.zeros_like(weights)
         recall_array = np.zeros_like(weights)

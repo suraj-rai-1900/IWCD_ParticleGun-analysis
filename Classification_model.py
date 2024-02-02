@@ -11,25 +11,16 @@ import matplotlib.pyplot as plt
 from utils import plot_class_frac, plot_sig_frac
 
 
-def weighted_f1(y_true, y_pred, w=1):
-    # gives more importance to recall over precision in F1 score
-
-    prec = precision_score(y_true, y_pred)
+def weighted_f1(y_true, y_pred, w):
+    precision = precision_score(y_true, y_pred)
     rec = recall_score(y_true, y_pred)
-    mod_f1 = (1 + w) * (prec * rec) / (w * prec + rec)
-    return mod_f1, prec, rec
+    mod_f1 = (1 + w) * (precision * rec) / (w * precision + rec)
+    return mod_f1, precision, rec
 
 
 def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False):
-    model = CutEngine(df, train_col, train_labels, model_name)
+    model = CutEngine(df, train_col, train_labels, model_name, grid_search)
     model.prepare_data()
-    if grid_search:
-        model.grid_search()
-    model.train()
-
-    test_acc, test_f1, test_precision, test_recall = model.test()
-    print(f' The best threshold is : {model.best_thresh}')
-    train_acc, train_f1, train_precision, train_recall = model.test_on_train()
 
     plt.hist(model.y_train, label='train_sig', histtype='step')
     plt.hist(model.y_test, label='test_sig', histtype='step')
@@ -39,6 +30,15 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
     plt.legend()
     plt.show()
     plt.clf()
+
+    if grid_search:
+        model.grid_search()
+    model.train()
+
+    test_acc, test_precision, test_recall, test_f1 = model.test()
+    print(f' The best threshold is : {model.best_thresh}')
+    print(f'The weight for weighted f1 is : {model.weight}')
+    train_acc, train_f1, train_precision, train_recall = model.test_on_train()
 
     model.plot_probs(label='train', y_log=True)
     print(f'The train accuracy is:{train_acc}')
@@ -52,51 +52,61 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
     print(f'The test precision is:{test_precision}')
     print(f'The test recall is:{test_recall}')
 
-    feature_imp = model.get_features_importances()
+    feature_imp = model.get_features_importance()
     print(feature_imp)
-    
+
     df[model_name + '_sig'] = 0
     df.loc[df['h5_labels'].isin(train_labels), model_name + '_sig'] = (model.y_prob >= model.best_thresh).astype(int)
 
 
 class CutEngine:
-    def __init__(self, df, train_col, train_labels=None, model_name='gbdt'):
+    def __init__(self, df, train_col, train_labels=None, model_name='gbdt', grid_search=False):
 
-        self.param_grid_gbdt = {
-            'n_estimators': [i for i in np.arange(100, 300, 20)],
-            'subsample': [i for i in np.arange(0.1, 0.9, 0.08)],
-            'tol': [10 ** -i for i in np.arange(1, 9, 0.8)],
-            'learning_rate': [0.01, 0.05, 0.1, 0.5, 1.0]
-        }
+        self.model_name = model_name
 
-        self.param_grid_adaboost = {
-            'n_estimators': [i for i in np.arange(50, 200, 20)],
-            'learning_rate': [0.01, 0.05, 0.1, 0.5, 1.0]
-        }
+        if grid_search:
+            self.param_grid_gbdt = {
+                'n_estimators': [i for i in np.arange(100, 300, 20)],
+                'subsample': [i for i in np.arange(0.1, 0.9, 0.08)],
+                'tol': [10 ** -i for i in np.arange(1, 9, 0.8)],
+                'learning_rate': [0.01, 0.05, 0.1, 0.5, 1.0]
+            }
 
-        self.param_grid_xgboost = {
-            'n_estimators': [i for i in np.arange(100, 300, 20)],
-            'subsample': [i for i in np.arange(0.1, 0.9, 0.08)],
-            'learning_rate': [0.01, 0.05, 0.1, 0.5, 1.0],
-            'max_depth': [3, 4, 5]
-        }
+            self.param_grid_adaboost = {
+                'n_estimators': [i for i in np.arange(50, 200, 20)],
+                'learning_rate': [0.01, 0.05, 0.1, 0.5, 1.0]
+            }
 
-        if model_name == 'gbdt':
-            self.param_grid = self.param_grid_gbdt
-            print(f"Using {model_name} model")
-            self.rf_model = GradientBoostingClassifier(n_estimators=280, subsample=0.1, tol=2.51*10**-7,
-                                                       learning_rate=0.01)
+            self.param_grid_xgboost = {
+                'n_estimators': [i for i in np.arange(100, 300, 20)],
+                'subsample': [i for i in np.arange(0.1, 0.9, 0.08)],
+                'learning_rate': [0.01, 0.05, 0.1, 0.5, 1.0],
+                'max_depth': [3, 4, 5]
+            }
 
-        elif model_name == 'adaboost':
-            self.param_grid = self.param_grid_adaboost
-            print(f"Using {model_name} model")
-            self.rf_model = AdaBoostClassifier(n_estimators=280, learning_rate=0.01)
+            if model_name == 'gbdt':
+                self.param_grid = self.param_grid_gbdt
+                self.rf_model = GradientBoostingClassifier()
 
-        elif model_name == 'xgboost':
-            self.param_grid = self.param_grid_xgboost
-            print(f"Using {model_name} model")
-            self.rf_model = XGBClassifier(n_estimators=280, subsample=0.1, learning_rate=0.01, 
-                                          max_depth=5)
+            elif model_name == 'adaboost':
+                self.param_grid = self.param_grid_adaboost
+                self.rf_model = AdaBoostClassifier()
+
+            elif model_name == 'xgboost':
+                self.param_grid = self.param_grid_xgboost
+                self.rf_model = XGBClassifier()
+        else:
+            if model_name == 'gbdt':
+                self.rf_model = GradientBoostingClassifier(n_estimators=280, subsample=0.1, tol=2.51*10**-7,
+                                                           learning_rate=0.01)
+
+            elif model_name == 'adaboost':
+                self.rf_model = AdaBoostClassifier(n_estimators=280, learning_rate=0.01)
+
+            elif model_name == 'xgboost':
+                self.rf_model = XGBClassifier(n_estimators=280, subsample=0.1, learning_rate=0.01, max_depth=5)
+
+        print(f"Using {model_name} model")
 
         if train_labels is None:
             self.training_labels = [1, 2, 3]
@@ -122,7 +132,9 @@ class CutEngine:
         self.y_prob = None
         self.test_prob = None
         self.train_prob = None
-        self.predictions = None
+        self.test_predictions = None
+        self.train_predictions = None
+        self.weight = None
 
     def prepare_data(self):
         df_cut = self.df[self.df['h5_labels'].isin(self.training_labels)]
@@ -134,7 +146,7 @@ class CutEngine:
         self.X = df_chosen.drop(columns=['true_sig'])
         self.y = df_chosen['true_sig']
 
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.2,
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=0.9,
                                                                                 random_state=42)
 
         scaler = StandardScaler()
@@ -151,7 +163,6 @@ class CutEngine:
         print(f"Best Parameters: {grid_search.best_params_}")
 
     def train(self):
-        # Train the chosen classifier
         self.rf_model.fit(self.X_train_scaled, self.y_train)
         self.rf_model_cal.fit(self.X_train_scaled, self.y_train)
 
@@ -159,26 +170,53 @@ class CutEngine:
         self.train_prob = self.rf_model.predict_proba(self.X_train_scaled)[:, 1]
         self.y_prob = self.rf_model.predict_proba(self.X_scaled)[:, 1]
 
-    def test(self, weight=1):
-        # Evaluate on the test set
+    def test(self):
+        best_threshold = 0
         best_f1 = 0
-        for threshold in np.linspace(0, 0.9, 100):
-            test_predictions = (self.test_prob >= threshold).astype(int)
-            test_f1, prec, rec = weighted_f1(self.y_test, test_predictions, w=weight)
-            if test_f1 > best_f1:
-                best_f1 = test_f1
-                self.best_thresh = threshold
-        self.predictions = (self.test_prob >= self.best_thresh).astype(int)
-        self.predictions = (self.test_prob >= self.best_thresh).astype(int)
-        test_accuracy = accuracy_score(self.y_test, self.predictions)
-        test_f1, prec, rec = weighted_f1(self.y_test, self.predictions, w=weight)
-        return test_accuracy, test_f1, prec, rec
 
-    def test_on_train(self, weight=1):
+        precision_array = np.array([])
+        recall_array = np.array([])
+        f1_array = np.array([])
+        threshold_array = np.array([])
+
+        weights = np.arange(0, 1, 0.01)
+        for weight in weights:
+            for threshold in np.linspace(0, 0.9, 100):
+                test_predictions = (self.test_prob >= threshold).astype(int)
+                test_f1, prec, rec = weighted_f1(self.y_test, test_predictions, w=weight)
+                if test_f1 > best_f1:
+                    best_f1 = test_f1
+                    best_threshold = threshold
+            predictions = (self.test_prob >= best_threshold).astype(int)
+            test_f1, prec, rec = weighted_f1(self.y_test, predictions, w=weight)
+            np.append(precision_array, prec)
+            np.append(recall_array, rec)
+            np.append(f1_array, test_f1)
+            np.append(threshold_array, best_threshold)
+
+        plt.errorbar(weights, precision_array, label=self.model_name + 'precision')
+        plt.errorbar(weights, recall_array, label=self.model_name + 'recall')
+        plt.plot(weights, f1_array, label=self.model_name + 'f1_score')
+        plt.xlim(0, 1)
+        plt.xlabel('Weight')
+        plt.ylim(0, 1)
+        plt.title('Precision, recall and f1_score for different weights')
+        plt.legend()
+        plt.show()
+        plt.clf()
+
+        index = np.argmax(f1_array)
+        self.best_thresh = threshold_array[index]
+        self.test_predictions = (self.test_prob >= self.best_thresh).astype(int)
+        test_accuracy = accuracy_score(self.y_test, self.test_predictions)
+        self.weight = weights[index]
+        return test_accuracy, precision_array[index], recall_array[index], f1_array[index]
+
+    def test_on_train(self):
         # Evaluate on the train set
-        train_predictions = (self.train_prob >= self.best_thresh).astype(int)
-        train_accuracy = accuracy_score(self.y_train, train_predictions)
-        train_f1, prec, rec = weighted_f1(self.y_train, train_predictions, w=weight)
+        self.train_predictions = (self.train_prob >= self.best_thresh).astype(int)
+        train_accuracy = accuracy_score(self.y_train, self.train_predictions)
+        train_f1, prec, rec = weighted_f1(self.y_train, self.train_predictions, w=self.weight)
         return train_accuracy, train_f1, prec, rec
 
     def plot_probs(self, label='test', y_log=False):
@@ -210,7 +248,7 @@ class CutEngine:
         plt.legend()
         plt.show()
 
-    def get_features_importances(self):
+    def get_features_importance(self):
         imp = self.rf_model.feature_importances_
         dic_imp = {}
         for i in range(len(self.features)):

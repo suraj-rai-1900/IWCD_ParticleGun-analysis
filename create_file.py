@@ -55,27 +55,18 @@ def create_fq_df(file_path='/home/pdeperio/machine_learning/data/IWCD_mPMT_Short
     offsets = get_h5_fq_offsets()
 
     reco_e_pos = np.array(fq.electron_position)
-    reco_mu_pos = np.array(fq.muon_position)
-    reco_pi0_pos = np.array(fq.pi0_position)
-
     reco_e_angles = math.angles_from_direction(np.array(fq.electron_direction))
-    reco_mu_angles = math.angles_from_direction(np.array(fq.muon_direction))
-    reco_pi0_angles = math.angles_from_direction(np.array(fq.pi0_direction))
 
     df = pd.DataFrame()
     df['reco_electron_mom'] = np.array(fq.electron_momentum)[offsets]
     df['reco_muon_mom'] = np.array(fq.muon_momentum)[offsets]
     df['reco_pi0_mom'] = np.array(fq.pi0_momentum)[offsets]
     df['reco_electron_dwall'] = math.dwall(reco_e_pos)[offsets]
-    df['reco_muon_dwall'] = math.dwall(reco_mu_pos)[offsets]
-    df['reco_pi0_dwall'] = math.dwall(reco_pi0_pos)[offsets]
     df['reco_electron_towall'] = math.towall(reco_e_pos, reco_e_angles)[offsets]
-    df['reco_muon_towall'] = math.towall(reco_mu_pos, reco_mu_angles)[offsets]
-    df['reco_pi0_towall'] = math.towall(reco_pi0_pos, reco_pi0_angles)[offsets]
-    df['e/mu_likelihood ratio'] = np.array(fq.muon_nll)[offsets] - np.array(fq.electron_nll)[offsets]
-    df['pi0/e_likelihood ratio'] = np.array(fq.electron_nll)[offsets] - np.array(fq.pi0_nll)[offsets]
+    df['e_likelihood'] = np.array(fq.electron_nll)[offsets]
+    df['mu_likelihood'] = np.array(fq.muon_nll)[offsets]
+    df['pi0_likelihood'] = np.array(fq.pi0_nll)[offsets]
     df['pi0_mass'] = np.array(fq.pi0_mass)[offsets]
-
     return df
 
 
@@ -88,9 +79,9 @@ def relevant_df(true_variables=None,
         softmax_variables = ['pgamma', 'pe', 'pmu', 'ppi0']
 
     if reco_variables is None:
-        reco_variables = ['e/mu_likelihood ratio', 'pi0/e_likelihood ratio', 'reco_electron_mom',
+        reco_variables = ['e_likelihood', 'mu_likelihood', 'pi0_likelihood', 'reco_electron_mom',
                           'reco_electron_dwall', 'reco_electron_towall', 'pi0_mass']
-
+      
     if true_variables is None:
         true_variables = ['h5_labels', 'h5_momentum', 'h5_towall', 'h5_dwall']
 

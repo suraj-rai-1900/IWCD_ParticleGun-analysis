@@ -180,12 +180,10 @@ class CutEngine:
 
         best_threshold_index = np.argmax(f1_array)
 
-        plt.plot(threshold, precision_array, label=self.model_name + 'precision')
-        plt.plot(threshold, recall_array, label=self.model_name + 'recall')
-        plt.plot(threshold, f1_array, label=self.model_name + 'f1_score')
-        plt.xlim(0, 1)
+        plt.plot(threshold, precision_array, label=self.model_name + ' precision')
+        plt.plot(threshold, recall_array, label=self.model_name + ' recall')
+        plt.plot(threshold, f1_array, label=self.model_name + ' f1_score')
         plt.xlabel('Threshold')
-        plt.ylim(0, 1)
         plt.title('Precision, recall and f1_score for different thresholds')
         plt.legend()
         plt.show()

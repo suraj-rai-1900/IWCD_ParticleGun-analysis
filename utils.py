@@ -24,6 +24,25 @@ def get_h5_fq_offsets(h5_true_file='/home/pdeperio/machine_learning/data/IWCD_mP
     return h5_fq_offsets
 
 
+def normalize(df, sig_label, bg_label):
+    if not isinstance(sig_label, (list, np.ndarray)):
+        sig_label = [sig_label]
+    if not isinstance(bg_label, (list, np.ndarray)):
+        bg_label = [bg_label]
+    prob_sig = 0
+    prob_bg = 0
+
+    label_map = ['pgamma', 'pe', 'pmu', 'ppi0']
+    for label in sig_label:
+        prob_sig += df[label_map[label]]
+    for label in bg_label:
+        prob_bg += df[label_map[label]]
+
+    norm_prob_sig = prob_sig/(prob_sig + prob_bg)
+    norm_prob_bg = prob_bg/(prob_sig + prob_bg)
+    return norm_prob_sig, norm_prob_bg
+
+
 def optimum_cut_linear(df, sig_label, bg_label, key1, key2, guess_1=0, guess_2=0, greater_than=True, is_log=False):
     if not isinstance(sig_label, (list, np.ndarray)):
         sig_label = [sig_label]

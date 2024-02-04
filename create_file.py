@@ -81,7 +81,7 @@ def relevant_df(true_variables=None,
         softmax_variables = ['pgamma', 'pe', 'pmu', 'ppi0']
 
     if reco_variables is None:
-        reco_variables = ['e_likelihood', 'mu_likelihood', 'pi0_likelihood', 'reco_electron_mom',
+        reco_variables = ['e/mu_likelihood ratio', 'pi0/e_likelihood ratio', 'e_likelihood', 'mu_likelihood', 'pi0_likelihood', 'reco_electron_mom',
                           'reco_electron_dwall', 'reco_electron_towall', 'pi0_mass']
       
     if true_variables is None:

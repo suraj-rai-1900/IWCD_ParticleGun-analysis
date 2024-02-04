@@ -258,6 +258,8 @@ def f1(df, cuts, sig_label, bg_label):
 
 def plot_sel_comp(df, sg_label, bg_label, cut1, cut2, cut1_label, cut2_label):
     label_map = ['gamma', 'e', 'mu', 'pi0']
+    color_map = ['red', 'blue', 'green', 'cyan']
+    
     if not isinstance(sg_label, (list, np.ndarray)):
         sg_label = [sg_label]
     if not isinstance(bg_label, (list, np.ndarray)):
@@ -271,15 +273,15 @@ def plot_sel_comp(df, sg_label, bg_label, cut1, cut2, cut1_label, cut2_label):
     ax = axes[0]
     for label in sg_label:
         ax.hist(df_cut1[df_cut1['h5_labels'] == label]['reco_electron_mom'], bins=15, range=(0, 1500),
-                label='sig' + label_map[label] + cut1_label, histtype='step', linewidth=1.5, color='red', linestyle='-')
+                label='sig ' + label_map[label] + cut1_label, histtype='step', linewidth=1.5, color=color_map[label], linestyle='-')
         ax.hist(df_cut2[df_cut2['h5_labels'] == label]['reco_electron_mom'], bins=15, range=(0, 1500),
-                label='sig' + label_map[label] + cut2_label, histtype='step', linewidth=1.5, color='red', linestyle='--')
+                label='sig ' + label_map[label] + ' ' + cut2_label, histtype='step', linewidth=1.5, color=color_map[label], linestyle='--')
     for label in bg_label:
         ax.hist(df_cut1[df_cut1['h5_labels'] == label]['reco_electron_mom'], bins=15, range=(0, 1500),
-                label='bg' + label_map[label] + cut1_label, histtype='step', linewidth=1.5, color='blue', linestyle='-')
+                label='bg ' + label_map[label] + cut1_label, histtype='step', linewidth=1.5, color=color_map[label], linestyle='-')
         ax.hist(df_cut2[df_cut2['h5_labels'] == label]['reco_electron_mom'], bins=15, range=(0, 1500),
-                label='bg' + label_map[label] + cut2_label, histtype='step', linewidth=1.5, color='blue', linestyle='--')
-    ax.set_xlabel('Reco_electron_mom', fontsize=20)
+                label='bg ' + label_map[label] + ' ' + cut2_label, histtype='step', linewidth=1.5, color=color_map[label], linestyle='--')
+    ax.set_xlabel('Reco Momentum', fontsize=20)
     ax.set_ylabel('Event count', fontsize=20)
     ax.set_yscale('log')
     ax.legend()
@@ -295,7 +297,7 @@ def plot_sel_comp(df, sg_label, bg_label, cut1, cut2, cut1_label, cut2_label):
         for j in range(10):
             vals_x_sig = np.concatenate((vals_x_sig, np.linspace(sig_x_edges[j], sig_x_edges[j + 1], 10)))
             vals_y_sig = np.concatenate((vals_y_sig, np.array([hist_cut2_sg[j] / hist_cut1_sg[j] for i in range(10)])))
-        ax.plot(vals_x_sig, vals_y_sig, label='Signal' + label_map[label], linewidth=1.5, linestyle=":", color='red')
+        ax.plot(vals_x_sig, vals_y_sig, label='Signal ' + label_map[label], linewidth=1.5, linestyle=":", color=color_map[label])
 
     for label in bg_label:
         hist_cut1_bg, bg_x_edges = np.histogram(df_cut1[df_cut1['h5_labels'] == label]['reco_electron_mom'],
@@ -307,7 +309,7 @@ def plot_sel_comp(df, sg_label, bg_label, cut1, cut2, cut1_label, cut2_label):
         for j in range(10):
             vals_x_bg = np.concatenate((vals_x_bg, np.linspace(bg_x_edges[j], bg_x_edges[j + 1], 10)))
             vals_y_bg = np.concatenate((vals_y_bg, np.array([hist_cut2_bg[j] / hist_cut1_bg[j] for i in range(10)])))
-        ax.plot(vals_x_bg, vals_y_bg, label='Background' + label_map[label], linewidth=1.5, linestyle=":", color='blue')
+        ax.plot(vals_x_bg, vals_y_bg, label='Background ' + label_map[label], linewidth=1.5, linestyle=":", color=color_map[label])
 
     ax.set_xlabel("Reco Momentum", fontsize=20)
     ax.set_ylabel(f'{cut2_label}/{cut1_label}', fontsize=20)

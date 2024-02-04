@@ -67,8 +67,8 @@ def create_fq_df(file_path='/home/pdeperio/machine_learning/data/IWCD_mPMT_Short
     df['mu_likelihood'] = np.array(fq.muon_nll)[offsets]
     df['pi0_likelihood'] = np.array(fq.pi0_nll)[offsets]
     df['pi0_mass'] = np.array(fq.pi0_mass)[offsets]
-    df['e/mu_likelihood'] = df['mu_likelihood'] - df['e_likelihood']
-    df['pi0/e_likelihood'] = df['e_likelihood'] - df['pi0_likelihood']
+    df['e/mu_likelihood ratio'] = df['mu_likelihood'] - df['e_likelihood']
+    df['pi0/e_likelihood ratio'] = df['e_likelihood'] - df['pi0_likelihood']
     return df
 
 

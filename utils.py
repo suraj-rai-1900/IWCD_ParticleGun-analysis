@@ -258,7 +258,7 @@ def f1(df, cuts, sig_label, bg_label):
 
 def plot_sel_comp(df, sg_label, bg_label, cut1, cut2, cut1_label, cut2_label):
     label_map = ['gamma', 'e', 'mu', 'pi0']
-    color_map = ['red', 'blue', 'green', 'cyan']
+    color_map = ['cyan', 'red', 'blue', 'green']
     
     if not isinstance(sg_label, (list, np.ndarray)):
         sg_label = [sg_label]

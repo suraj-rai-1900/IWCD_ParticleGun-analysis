@@ -17,6 +17,15 @@ def fq_emu_base(df):
     return cuts
 
 
+def fq_emu(df):
+    cuts = (
+            (df['e/mu_likelihood ratio'] > 119.2 - 0.38 * df['reco_electron_mom'])
+            & (df['e/mu_likelihood ratio'] > 44.5 - 0.25 * df['reco_electron_dwall'])
+            & (df['e/mu_likelihood ratio'] > 148.6 - 0.74 * df['reco_electron_towall'])
+    )
+    return cuts
+    
+
 def fq_epi0_base(df):
     cuts = (
             (df['pi0/e_likelihood ratio'] < 32.2 + 0.42 * df['reco_electron_mom'])
@@ -26,6 +35,16 @@ def fq_epi0_base(df):
     )
     return cuts
 
+
+def fq_epi0(df):
+    cuts = (
+            (df['pi0/e_likelihood ratio'] < 36.1 + 0.81 * df['reco_electron_mom'])
+            & (df['pi0/e_likelihood ratio'] < 322 - 1.8 * df['pi0_mass'])
+            & (df['pi0/e_likelihood ratio'] < 227.9 + 2.79 * df['reco_electron_dwall'])
+            & (df['pi0/e_likelihood ratio'] < 70.9 + 02.79 * df['reco_electron_towall'])
+    )
+    return cuts
+    
 
 def ml_emu_base(df):
     cuts = (

@@ -41,7 +41,7 @@ def fq_epi0(df):
             (df['pi0/e_likelihood ratio'] < 36.1 + 0.81 * df['reco_electron_mom'])
             & (df['pi0/e_likelihood ratio'] < 322 - 1.8 * df['pi0_mass'])
             & (df['pi0/e_likelihood ratio'] < 227.9 + 2.79 * df['reco_electron_dwall'])
-            & (df['pi0/e_likelihood ratio'] < 70.9 + 02.79 * df['reco_electron_towall'])
+            & (df['pi0/e_likelihood ratio'] < 70.9 + 2.79 * df['reco_electron_towall'])
     )
     return cuts
     

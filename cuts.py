@@ -53,9 +53,24 @@ def ml_emu_base(df):
     return cuts
 
 
+def ml_emu(df):
+    cuts = (
+        (df['pmu'] < 10 ** (-0.6))
+    )
+    return cuts
+
+
 def ml_epi0_base(df):
     cuts = (
-            (df['ppi0'] < 10 ** (-0.6))
-            & (df['pe'] > 10 ** (-1.2))
+            (df['ppi0']/(df['ppi0'] + df['pe'] + df['pgamma']) < 10 ** (-0.6))
+            & (df['pe']/(df['ppi0'] + df['pe'] + df['pgamma']) > 10 ** (-1.2))
+    )
+    return cuts
+
+
+def ml_epi0(df):
+    cuts = (
+            (df['ppi0']/(df['ppi0'] + df['pe'] + df['pgamma']) < 10 ** (-0.6))
+            & (df['pe']/(df['ppi0'] + df['pe'] + df['pgamma']) > 10 ** (-1.2))
     )
     return cuts

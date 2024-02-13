@@ -53,7 +53,11 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
     print(f'The test recall is:{test_recall}')
 
     feature_imp = model.get_features_importance()
-    print(feature_imp)
+    for key in feature_imp:
+        print(f'{key} : {feature_imp[key]}')
+
+    model.plot_roc(mode='rejection', label=model_name)
+    model.plot_roc(mode='efficiency', label=model_name)
 
     df[model_name + '_sig'] = 0
     df.loc[df['h5_labels'].isin(train_labels), model_name + '_sig'] = (model.y_prob >= model.best_thresh).astype(int)

@@ -236,7 +236,7 @@ class CutEngine:
             dic_imp[self.features[i]] = imp[i]
         return dic_imp
 
-        def plot_roc(self, x_label="Signal_Efficiency", y_label="Background_Rejection",
+    def plot_roc(self, x_label="Signal_Efficiency", y_label="Background_Rejection",
                  x_lim=None, y_lim=None, y_log=None, x_log=None, legend='best', mode='rejection', **plot_args):
 
         fig, ax = plt.subplots(1, 1)

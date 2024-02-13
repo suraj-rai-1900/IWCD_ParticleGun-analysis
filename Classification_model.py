@@ -228,7 +228,7 @@ class CutEngine:
         plt.title("Calibration Curve")
         plt.legend()
         plt.show()
-
+        
     def get_features_importance(self):
         imp = self.rf_model.feature_importances_
         dic_imp = {}
@@ -236,3 +236,36 @@ class CutEngine:
             dic_imp[self.features[i]] = imp[i]
         return dic_imp
 
+        def plot_roc(self, x_label="Signal_Efficiency", y_label="Background_Rejection",
+                 x_lim=None, y_lim=None, y_log=None, x_log=None, legend='best', mode='rejection', **plot_args):
+
+        fig, ax = plt.subplots(1, 1)
+        fpr, tpr, _ = metrics.roc_curve(self.y, self.y_prob)
+        auc = metrics.auc(fpr, tpr)
+        args = {**plot_args}
+        args['label'] = f"{args['label']} (AUC={auc:.4f})"
+        if mode == 'rejection':
+            if y_log is None:
+                y_log = True
+            with np.errstate(divide='ignore'):
+                ax.plot(tpr, 1 / fpr, **args)
+        elif mode == 'efficiency':
+            ax.plot(fpr, tpr, **args)
+            x_label = "Background_Mis_ID rate"
+            y_label = "Signal Efficiency"
+        else:
+            raise ValueError(f"Unknown ROC curve mode '{mode}'.")
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+        if x_log:
+            ax.set_xscale('log')
+        if y_log:
+            ax.set_yscale('log')
+        if y_lim:
+            ax.set_ylim(y_lim)
+        if x_lim:
+            ax.set_xlim(x_lim)
+        if legend:
+            ax.legend(loc=legend)
+        return fig, ax
+        

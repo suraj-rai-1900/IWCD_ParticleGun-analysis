@@ -299,14 +299,14 @@ class CutEngine:
         binned_values = bins.apply_binning((self.y_prob > self.best_thresh), binning)
         x = bins.bin_centres(binning[0])
         if errors:
-            y_values, y_errors = bins.binned_efficiencies(binned_values, return_errors=False, reverse=False)
+            y_values, y_errors = bins.binned_efficiencies(binned_values, errors, reverse=False)
             x_errors = bins.bin_halfwidths(binning[0])
             plot_args.setdefault('marker', '')
             plot_args.setdefault('capsize', 4)
             plot_args.setdefault('capthick', 2)
             ax.errorbar(x, y_values, yerr=y_errors, xerr=x_errors, **plot_args)
         else:
-            y = bins.binned_efficiencies(binned_values, return_errors=False, reverse=False)
+            y = bins.binned_efficiencies(binned_values, errors, reverse=False)
             plot_args.setdefault('marker', 'o')
             ax.plot(x, y, **plot_args)
 

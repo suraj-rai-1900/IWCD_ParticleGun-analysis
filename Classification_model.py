@@ -10,6 +10,7 @@ from sklearn.calibration import calibration_curve
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import plot_class_frac, plot_sig_frac
+import Watchmal_dependencies.binning as bins
 
 
 def weighted_f1(y_true, y_pred, w=1):
@@ -62,6 +63,22 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
 
     df[model_name + '_sig'] = 0
     df.loc[df['h5_labels'].isin(train_labels), model_name + '_sig'] = (model.y_prob >= model.best_thresh).astype(int)
+
+    df_cut = df[df['h5_labels'].isin(train_labels)]
+
+    mom_binning = bins.get_binning(df_cut['h5_momentum'], 20, 0, 1000)
+    reco_mom_e_binning = bins.get_binning(df_cut['reco_electron_mom'], 20, 0, 1000)
+    dwall_binning = bins.get_binning(df_cut['h5_dwall'], 22, 50, 300)
+    towall_binning = bins.get_binning(df_cut['h5_towall'], 30, 50, 800)
+
+    model.plot_efficiency_profile(mom_binning, ax=None, x_label="Signal Efficiency",
+                                  y_label="true_mom", legend='best', y_lim=None, errors=True)
+    model.plot_efficiency_profile(reco_mom_e_binning, ax=None, x_label="Signal Efficiency",
+                                  y_label="mom_e", legend='best', y_lim=None, errors=True)
+    model.plot_efficiency_profile(dwall_binning, ax=None, x_label="Signal Efficiency",
+                                  y_label="dwall", legend='best', y_lim=None, errors=True)
+    model.plot_efficiency_profile(towall_binning, ax=None, x_label="Signal Efficiency",
+                                  y_label="towall", legend='best', y_lim=None, errors=True)
 
 
 class CutEngine:
@@ -116,6 +133,7 @@ class CutEngine:
         if train_labels is None:
             self.training_labels = [1, 2, 3]
 
+        self.model_name = model_name
         self.training_labels = train_labels
         self.best_thresh = 0
         self.training_col = train_col
@@ -233,7 +251,7 @@ class CutEngine:
         plt.title("Calibration Curve")
         plt.legend()
         plt.show()
-        
+
     def get_features_importance(self):
         imp = self.rf_model.feature_importances_
         dic_imp = {}
@@ -273,4 +291,32 @@ class CutEngine:
         if legend:
             ax.legend(loc=legend)
         return fig, ax
+
+    def plot_efficiency_profile(self, binning, ax=None, x_label="",
+                                y_label="", legend='best', y_lim=None, errors=True,  **plot_args):
+
+        plot_args.setdefault('lw', 2)
+        binned_values = bins.apply_binning((self.y_prob > self.best_thresh), binning)
+        x = bins.bin_centres(binning[0])
+        if errors:
+            y_values, y_errors = bins.binned_efficiencies(binned_values, return_errors=False, reverse=False)
+            x_errors = bins.bin_halfwidths(binning[0])
+            plot_args.setdefault('marker', '')
+            plot_args.setdefault('capsize', 4)
+            plot_args.setdefault('capthick', 2)
+            ax.errorbar(x, y_values, yerr=y_errors, xerr=x_errors, **plot_args)
+        else:
+            y = bins.binned_efficiencies(binned_values, return_errors=False, reverse=False)
+            plot_args.setdefault('marker', 'o')
+            ax.plot(x, y, **plot_args)
+
+        fig, ax = plt.subplots()
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+        if legend:
+            ax.legend(loc=legend)
+        if y_lim is not None:
+            ax.set_ylim(y_lim)
+        return fig, ax
+
         

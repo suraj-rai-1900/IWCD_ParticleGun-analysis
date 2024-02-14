@@ -71,13 +71,13 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
     dwall_binning = bins.get_binning(df_cut['h5_dwall'], 22, 50, 300)
     towall_binning = bins.get_binning(df_cut['h5_towall'], 30, 50, 800)
 
-    model.plot_efficiency_profile(mom_binning, ax=None, x_label="Signal Efficiency",
+    model.plot_efficiency_profile(mom_binning, x_label="Signal Efficiency",
                                   y_label="true_mom", legend='best', y_lim=None, errors=True)
-    model.plot_efficiency_profile(reco_mom_e_binning, ax=None, x_label="Signal Efficiency",
+    model.plot_efficiency_profile(reco_mom_e_binning, x_label="Signal Efficiency",
                                   y_label="mom_e", legend='best', y_lim=None, errors=True)
-    model.plot_efficiency_profile(dwall_binning, ax=None, x_label="Signal Efficiency",
+    model.plot_efficiency_profile(dwall_binning, x_label="Signal Efficiency",
                                   y_label="dwall", legend='best', y_lim=None, errors=True)
-    model.plot_efficiency_profile(towall_binning, ax=None, x_label="Signal Efficiency",
+    model.plot_efficiency_profile(towall_binning, x_label="Signal Efficiency",
                                   y_label="towall", legend='best', y_lim=None, errors=True)
 
 
@@ -292,9 +292,9 @@ class CutEngine:
             ax.legend(loc=legend)
         return fig, ax
 
-    def plot_efficiency_profile(self, binning, ax=None, x_label="",
+    def plot_efficiency_profile(self, binning, x_label="",
                                 y_label="", legend='best', y_lim=None, errors=True,  **plot_args):
-
+        fig, ax = plt.subplots()
         plot_args.setdefault('lw', 2)
         binned_values = bins.apply_binning((self.y_prob > self.best_thresh), binning)
         x = bins.bin_centres(binning[0])
@@ -310,7 +310,6 @@ class CutEngine:
             plot_args.setdefault('marker', 'o')
             ax.plot(x, y, **plot_args)
 
-        fig, ax = plt.subplots()
         ax.set_xlabel(x_label)
         ax.set_ylabel(y_label)
         if legend:

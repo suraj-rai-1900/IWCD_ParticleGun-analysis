@@ -64,21 +64,21 @@ def run_model(df, train_col, train_labels, model_name='gbdt', grid_search=False)
     df[model_name + '_sig'] = 0
     df.loc[df['h5_labels'].isin(train_labels), model_name + '_sig'] = (model.y_prob >= model.best_thresh).astype(int)
 
-    df_cut = df[df['h5_labels'].isin(train_labels)]
+    df_cut = df[df['h5_labels'] == 1]
 
     mom_binning = bins.get_binning(df_cut['h5_momentum'], 20, 0, 1000)
     reco_mom_e_binning = bins.get_binning(df_cut['reco_electron_mom'], 20, 0, 1000)
     dwall_binning = bins.get_binning(df_cut['h5_dwall'], 22, 50, 300)
     towall_binning = bins.get_binning(df_cut['h5_towall'], 30, 50, 800)
 
-    model.plot_efficiency_profile(mom_binning, x_label="Signal Efficiency",
-                                  y_label="true_mom", legend='best', y_lim=None, errors=True)
-    model.plot_efficiency_profile(reco_mom_e_binning, x_label="Signal Efficiency",
-                                  y_label="mom_e", legend='best', y_lim=None, errors=True)
-    model.plot_efficiency_profile(dwall_binning, x_label="Signal Efficiency",
-                                  y_label="dwall", legend='best', y_lim=None, errors=True)
-    model.plot_efficiency_profile(towall_binning, x_label="Signal Efficiency",
-                                  y_label="towall", legend='best', y_lim=None, errors=True)
+    model.plot_efficiency_profile(mom_binning, y_label="Signal Efficiency",
+                                  x_label="true_mom", legend='best', y_lim=None, errors=True)
+    model.plot_efficiency_profile(reco_mom_e_binning, y_label="Signal Efficiency",
+                                  x_label="mom_e", legend='best', y_lim=None, errors=True)
+    model.plot_efficiency_profile(dwall_binning, y_label="Signal Efficiency",
+                                  x_label="dwall", legend='best', y_lim=None, errors=True)
+    model.plot_efficiency_profile(towall_binning, y_label="Signal Efficiency",
+                                  x_label="towall", legend='best', y_lim=None, errors=True)
 
 
 class CutEngine:
@@ -296,7 +296,7 @@ class CutEngine:
                                 y_label="", legend='best', y_lim=None, errors=True,  **plot_args):
         fig, ax = plt.subplots()
         plot_args.setdefault('lw', 2)
-        binned_values = bins.apply_binning((self.y_prob > self.best_thresh), binning)
+        binned_values = bins.apply_binning((self.y_prob > self.best_thresh)[self.df['h5_labels'] == 1], binning)
         x = bins.bin_centres(binning[0])
         if errors:
             y_values, y_errors = bins.binned_efficiencies(binned_values, errors, reverse=False)
@@ -317,5 +317,3 @@ class CutEngine:
         if y_lim is not None:
             ax.set_ylim(y_lim)
         return fig, ax
-
-        

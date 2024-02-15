@@ -294,9 +294,10 @@ class CutEngine:
 
     def plot_efficiency_profile(self, binning, x_label="",
                                 y_label="", legend='best', y_lim=None, errors=True,  **plot_args):
+        df_cut = self.df[self.df['h5_labels'].isin(self.training_labels)]
         fig, ax = plt.subplots()
         plot_args.setdefault('lw', 2)
-        binned_values = bins.apply_binning((self.y_prob > self.best_thresh)[self.df['h5_labels'] == 1], binning)
+        binned_values = bins.apply_binning((self.y_prob > self.best_thresh)[df_cut['h5_labels'] == 1], binning)
         x = bins.bin_centres(binning[0])
         if errors:
             y_values, y_errors = bins.binned_efficiencies(binned_values, errors, reverse=False)
